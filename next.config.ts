@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '/book-tracking-app', // Replace with your GitHub repo name
+  basePath: '/book-tracking-app',
+  assetPrefix: '/book-tracking-app/',
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
   },
 };
 
