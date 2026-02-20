@@ -1,4 +1,4 @@
 1:"$Sreact.fragment"
 2:I[39756,["/book-tracking-app/_next/static/chunks/42879de7b8087bc9.js"],"default"]
 3:I[37457,["/book-tracking-app/_next/static/chunks/42879de7b8087bc9.js"],"default"]
-0:{"buildId":"Jbi9H4QOWuvlUtcUJo5Gs","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"q3v5IQgLRs0RLUC0lil_I","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
