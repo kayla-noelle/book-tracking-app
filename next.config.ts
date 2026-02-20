@@ -1,8 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  basePath: '/book-tracking-app', // Replace with your GitHub repo name
+  images: {
+    unoptimized: true, // Required for static export
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
