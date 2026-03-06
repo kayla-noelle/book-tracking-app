@@ -1,5 +1,9 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookOpen, Search, Star, ChevronRight, User } from 'lucide-react';
+import SearchModal from '@/components/SearchModal';
 
 // Warm palette for placeholder book covers
 const COVER_COLORS = [
@@ -7,14 +11,33 @@ const COVER_COLORS = [
   '#6B6B3D', '#3D6B8B', '#8B3D6E', '#4A8B6B', '#7C6B4A',
 ];
 
-function getCoverColor(id: string) {
-  return COVER_COLORS[parseInt(id) % COVER_COLORS.length];
+function hashId(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) % COVER_COLORS.length;
+  }
+  return Math.abs(hash);
 }
 
-function BookCover({ id, size = 'md' }: { id: string; size?: 'sm' | 'md' }) {
+function getCoverColor(id: string) {
+  return COVER_COLORS[hashId(id)];
+}
+
+function BookCover({ id, coverUrl, size = 'md' }: { id: string; coverUrl?: string; size?: 'sm' | 'md' }) {
   const dims = size === 'sm'
     ? { width: 48, height: 72, iconSize: 16 }
     : { width: 64, height: 96, iconSize: 22 };
+
+  if (coverUrl) {
+    return (
+      <img
+        src={coverUrl}
+        alt="Book cover"
+        className="rounded-md flex-shrink-0 object-cover"
+        style={{ width: dims.width, height: dims.height }}
+      />
+    );
+  }
 
   return (
     <div
@@ -43,52 +66,57 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+const DEFAULT_BOOKS: Book[] = [
+  { id: '1', title: 'The Name of the Wind', author: 'Patrick Rothfuss', status: 'reading', genres: ['Fantasy', 'Adventure'], dateAdded: '2024-01-15' },
+  { id: '2', title: 'Project Hail Mary', author: 'Andy Weir', status: 'reading', genres: ['Science Fiction', 'Thriller'], dateAdded: '2024-02-01' },
+  { id: '4', title: 'Foundation', author: 'Isaac Asimov', status: 'want-to-read', genres: ['Science Fiction'], dateAdded: '2024-01-10' },
+  { id: '6', title: 'Mistborn', author: 'Brandon Sanderson', status: 'want-to-read', genres: ['Fantasy'], dateAdded: '2024-01-20' },
+  { id: '8', title: 'Bird Box', author: 'Josh Malerman', status: 'want-to-read', genres: ['Horror'], dateAdded: '2024-02-05' },
+  { id: '9', title: 'Atomic Habits', author: 'James Clear', status: 'want-to-read', genres: ['Non-Fiction'], dateAdded: '2024-02-10' },
+  { id: '3', title: 'Dune', author: 'Frank Herbert', status: 'completed', genres: ['Science Fiction'], dateAdded: '2024-01-01', rating: 5 },
+  { id: '5', title: 'The Hobbit', author: 'J.R.R. Tolkien', status: 'completed', genres: ['Fantasy'], dateAdded: '2023-12-15', rating: 5 },
+  { id: '7', title: 'The Shining', author: 'Stephen King', status: 'completed', genres: ['Horror'], dateAdded: '2023-11-01', rating: 4 },
+];
+
+const DEFAULT_PROGRESS: Record<string, number> = { '1': 42, '2': 67 };
+
+const genres = ['Fantasy', 'Science Fiction', 'Horror', 'Non-Fiction', 'Romance', 'Mystery', 'Thriller', 'Literary Fiction'];
+
+const recentActivity = [
+  { color: '#4A7C6F', text: 'Started', book: 'Project Hail Mary', suffix: '', when: '2 weeks ago' },
+  { color: '#F4B942', text: 'Finished', book: 'Dune', suffix: '', when: '1 month ago' },
+  { color: '#6B3D6E', text: 'Added', book: 'Atomic Habits', suffix: 'to Want to Read', when: '1 month ago' },
+  { color: '#F4B942', text: 'Finished', book: 'The Hobbit', suffix: '', when: '2 months ago' },
+];
+
 export default function Home() {
-  const currentlyReading: Book[] = [
-    {
-      id: '1',
-      title: 'The Name of the Wind',
-      author: 'Patrick Rothfuss',
-      status: 'reading',
-      genres: ['Fantasy', 'Adventure'],
-      dateAdded: '2024-01-15',
-    },
-    {
-      id: '2',
-      title: 'Project Hail Mary',
-      author: 'Andy Weir',
-      status: 'reading',
-      genres: ['Science Fiction', 'Thriller'],
-      dateAdded: '2024-02-01',
-    },
-  ];
+  const [books, setBooks] = useState<Book[]>(DEFAULT_BOOKS);
+  const [progress] = useState<Record<string, number>>(DEFAULT_PROGRESS);
+  const [showSearch, setShowSearch] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
-  const wantToRead: Book[] = [
-    { id: '4', title: 'Foundation', author: 'Isaac Asimov', status: 'want-to-read', genres: ['Science Fiction'], dateAdded: '2024-01-10' },
-    { id: '6', title: 'Mistborn', author: 'Brandon Sanderson', status: 'want-to-read', genres: ['Fantasy'], dateAdded: '2024-01-20' },
-    { id: '8', title: 'Bird Box', author: 'Josh Malerman', status: 'want-to-read', genres: ['Horror'], dateAdded: '2024-02-05' },
-    { id: '9', title: 'Atomic Habits', author: 'James Clear', status: 'want-to-read', genres: ['Non-Fiction'], dateAdded: '2024-02-10' },
-  ];
+  useEffect(() => {
+    const stored = localStorage.getItem('pageturner-books');
+    if (stored) {
+      try { setBooks(JSON.parse(stored)); } catch { /* ignore */ }
+    }
+    setHydrated(true);
+  }, []);
 
-  const completed: Book[] = [
-    { id: '3', title: 'Dune', author: 'Frank Herbert', status: 'completed', genres: ['Science Fiction'], dateAdded: '2024-01-01', rating: 5 },
-    { id: '5', title: 'The Hobbit', author: 'J.R.R. Tolkien', status: 'completed', genres: ['Fantasy'], dateAdded: '2023-12-15', rating: 5 },
-    { id: '7', title: 'The Shining', author: 'Stephen King', status: 'completed', genres: ['Horror'], dateAdded: '2023-11-01', rating: 4 },
-  ];
+  useEffect(() => {
+    if (hydrated) {
+      localStorage.setItem('pageturner-books', JSON.stringify(books));
+    }
+  }, [books, hydrated]);
 
-  const readingProgress: Record<string, number> = {
-    '1': 42,
-    '2': 67,
-  };
+  function addBook(book: Book) {
+    setBooks(prev => prev.some(b => b.id === book.id) ? prev : [book, ...prev]);
+  }
 
-  const genres = ['Fantasy', 'Science Fiction', 'Horror', 'Non-Fiction', 'Romance', 'Mystery', 'Thriller', 'Literary Fiction'];
-
-  const recentActivity = [
-    { color: '#4A7C6F', text: 'Started', book: 'Project Hail Mary', suffix: '', when: '2 weeks ago' },
-    { color: '#F4B942', text: 'Finished', book: 'Dune', suffix: '', when: '1 month ago' },
-    { color: '#6B3D6E', text: 'Added', book: 'Atomic Habits', suffix: 'to Want to Read', when: '1 month ago' },
-    { color: '#F4B942', text: 'Finished', book: 'The Hobbit', suffix: '', when: '2 months ago' },
-  ];
+  const currentlyReading = books.filter(b => b.status === 'reading');
+  const wantToRead = books.filter(b => b.status === 'want-to-read');
+  const completed = books.filter(b => b.status === 'completed');
+  const existingIds = new Set(books.map(b => b.id));
 
   return (
     <div className="min-h-screen">
@@ -110,7 +138,11 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button style={{ color: '#D4C9B5' }} className="hover:text-white transition-colors">
+            <button
+              style={{ color: '#D4C9B5' }}
+              className="hover:text-white transition-colors"
+              onClick={() => setShowSearch(true)}
+            >
               <Search size={20} />
             </button>
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F4B942' }}>
@@ -128,9 +160,9 @@ export default function Home() {
           style={{ borderColor: '#D4C9B5' }}
         >
           {[
-            { value: 3, label: 'Books Read in 2024' },
-            { value: 2, label: 'Currently Reading' },
-            { value: 4, label: 'Want to Read' },
+            { value: completed.length, label: 'Books Read' },
+            { value: currentlyReading.length, label: 'Currently Reading' },
+            { value: wantToRead.length, label: 'Want to Read' },
           ].map((stat, i) => (
             <div key={stat.label} className="flex items-center gap-6">
               {i > 0 && <div className="hidden md:block w-px h-10" style={{ backgroundColor: '#D4C9B5' }} />}
@@ -142,16 +174,17 @@ export default function Home() {
           ))}
           <div className="flex-1 hidden md:block min-w-40">
             <div className="flex justify-between mb-1">
-              <span className="text-xs" style={{ color: '#6B5A44' }}>2024 Reading Goal</span>
-              <span className="text-xs font-semibold" style={{ color: '#3D3228' }}>3 / 12 books</span>
+              <span className="text-xs" style={{ color: '#6B5A44' }}>Reading Goal</span>
+              <span className="text-xs font-semibold" style={{ color: '#3D3228' }}>{completed.length} / 12 books</span>
             </div>
             <div className="w-full rounded-full h-2" style={{ backgroundColor: '#EEE8DD' }}>
-              <div className="h-2 rounded-full" style={{ width: '25%', backgroundColor: '#F4B942' }} />
+              <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#F4B942' }} />
             </div>
           </div>
           <button
             className="ml-auto px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
             style={{ backgroundColor: '#F4B942', color: '#3D3228' }}
+            onClick={() => setShowSearch(true)}
           >
             + Add Book
           </button>
@@ -178,7 +211,7 @@ export default function Home() {
                     className="bg-white rounded-xl shadow-sm border p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
                     style={{ borderColor: '#D4C9B5' }}
                   >
-                    <BookCover id={book.id} size="md" />
+                    <BookCover id={book.id} coverUrl={book.coverUrl} size="md" />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-base" style={{ color: '#2C2416' }}>{book.title}</h3>
                       <p className="text-sm mb-2" style={{ color: '#6B5A44' }}>{book.author}</p>
@@ -193,21 +226,26 @@ export default function Home() {
                           </span>
                         ))}
                       </div>
-                      <div>
-                        <div className="flex justify-between text-xs mb-1" style={{ color: '#6B5A44' }}>
-                          <span>Reading progress</span>
-                          <span className="font-semibold">{readingProgress[book.id]}%</span>
+                      {progress[book.id] !== undefined && (
+                        <div>
+                          <div className="flex justify-between text-xs mb-1" style={{ color: '#6B5A44' }}>
+                            <span>Reading progress</span>
+                            <span className="font-semibold">{progress[book.id]}%</span>
+                          </div>
+                          <div className="w-full rounded-full h-1.5" style={{ backgroundColor: '#EEE8DD' }}>
+                            <div
+                              className="h-1.5 rounded-full"
+                              style={{ width: `${progress[book.id]}%`, backgroundColor: '#4A7C6F' }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full rounded-full h-1.5" style={{ backgroundColor: '#EEE8DD' }}>
-                          <div
-                            className="h-1.5 rounded-full"
-                            style={{ width: `${readingProgress[book.id]}%`, backgroundColor: '#4A7C6F' }}
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 ))}
+                {currentlyReading.length === 0 && (
+                  <p className="text-sm" style={{ color: '#6B5A44' }}>No books in progress. Search for one to start reading!</p>
+                )}
               </div>
             </section>
 
@@ -226,12 +264,21 @@ export default function Home() {
                     className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                     style={{ borderColor: '#D4C9B5' }}
                   >
-                    <div
-                      className="h-28 flex items-center justify-center"
-                      style={{ backgroundColor: getCoverColor(book.id) }}
-                    >
-                      <BookOpen size={28} className="text-white opacity-40" />
-                    </div>
+                    {book.coverUrl ? (
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="w-full object-cover"
+                        style={{ height: 112 }}
+                      />
+                    ) : (
+                      <div
+                        className="h-28 flex items-center justify-center"
+                        style={{ backgroundColor: getCoverColor(book.id) }}
+                      >
+                        <BookOpen size={28} className="text-white opacity-40" />
+                      </div>
+                    )}
                     <div className="p-2.5">
                       <h4 className="font-semibold text-xs leading-tight" style={{ color: '#2C2416' }}>{book.title}</h4>
                       <p className="text-xs mt-0.5" style={{ color: '#6B5A44' }}>{book.author}</p>
@@ -256,7 +303,7 @@ export default function Home() {
                     className="bg-white rounded-xl shadow-sm border p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
                     style={{ borderColor: '#D4C9B5' }}
                   >
-                    <BookCover id={book.id} size="sm" />
+                    <BookCover id={book.id} coverUrl={book.coverUrl} size="sm" />
                     <div className="flex-1">
                       <h3 className="font-bold text-sm" style={{ color: '#2C2416' }}>{book.title}</h3>
                       <p className="text-xs mb-1.5" style={{ color: '#6B5A44' }}>{book.author}</p>
@@ -318,17 +365,30 @@ export default function Home() {
 
             {/* Reading Challenge */}
             <div className="bg-white rounded-xl shadow-sm border p-5" style={{ borderColor: '#D4C9B5' }}>
-              <h3 className="font-bold text-base mb-1" style={{ color: '#3D3228' }}>2024 Reading Challenge</h3>
-              <p className="text-xs mb-3" style={{ color: '#6B5A44' }}>3 of 12 books complete</p>
+              <h3 className="font-bold text-base mb-1" style={{ color: '#3D3228' }}>Reading Challenge</h3>
+              <p className="text-xs mb-3" style={{ color: '#6B5A44' }}>{completed.length} of 12 books complete</p>
               <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: '#EEE8DD' }}>
-                <div className="h-3 rounded-full" style={{ width: '25%', backgroundColor: '#F4B942' }} />
+                <div
+                  className="h-3 rounded-full"
+                  style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#F4B942' }}
+                />
               </div>
-              <p className="text-xs" style={{ color: '#6B5A44' }}>25% of goal — you&apos;re on track!</p>
+              <p className="text-xs" style={{ color: '#6B5A44' }}>
+                {Math.round((completed.length / 12) * 100)}% of goal
+              </p>
             </div>
 
           </div>
         </div>
       </main>
+
+      {showSearch && (
+        <SearchModal
+          onClose={() => setShowSearch(false)}
+          onAdd={addBook}
+          existingIds={existingIds}
+        />
+      )}
     </div>
   );
 }
