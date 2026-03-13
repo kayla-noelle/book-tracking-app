@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
-import { BookOpen, Search, Star, ChevronRight, User } from 'lucide-react';
+import Link from 'next/link';
+import { BookOpen, Search, Star, ChevronRight, User, Menu, X } from 'lucide-react';
 import SearchModal from '@/components/SearchModal';
 
 // Warm palette for placeholder book covers
 const COVER_COLORS = [
-  '#8B6914', '#4A7C6F', '#6B3D6E', '#4A6B8B', '#8B4A4A',
-  '#6B6B3D', '#3D6B8B', '#8B3D6E', '#4A8B6B', '#7C6B4A',
+  '#fd601a', '#4A7C6F', '#3d7a5e', '#5a9a82', '#6b9a5a',
+  '#6b9a3d', '#3d9a6b', '#7a9a3d', '#4A8B6B', '#4a7a5a',
 ];
 
 function hashId(id: string): number {
@@ -57,8 +58,8 @@ function StarRating({ rating }: { rating: number }) {
           key={star}
           size={12}
           style={{
-            color: star <= rating ? '#F4B942' : '#D4C9B5',
-            fill: star <= rating ? '#F4B942' : 'none',
+            color: star <= rating ? '#f5c518' : '#cccccc',
+            fill: star <= rating ? '#f5c518' : 'none',
           }}
         />
       ))}
@@ -84,15 +85,16 @@ const genres = ['Fantasy', 'Science Fiction', 'Horror', 'Non-Fiction', 'Romance'
 
 const recentActivity = [
   { color: '#4A7C6F', text: 'Started', book: 'Project Hail Mary', suffix: '', when: '2 weeks ago' },
-  { color: '#F4B942', text: 'Finished', book: 'Dune', suffix: '', when: '1 month ago' },
-  { color: '#6B3D6E', text: 'Added', book: 'Atomic Habits', suffix: 'to Want to Read', when: '1 month ago' },
-  { color: '#F4B942', text: 'Finished', book: 'The Hobbit', suffix: '', when: '2 months ago' },
+  { color: '#fd601a', text: 'Finished', book: 'Dune', suffix: '', when: '1 month ago' },
+  { color: '#3d9a6b', text: 'Added', book: 'Atomic Habits', suffix: 'to Want to Read', when: '1 month ago' },
+  { color: '#fd601a', text: 'Finished', book: 'The Hobbit', suffix: '', when: '2 months ago' },
 ];
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>(DEFAULT_BOOKS);
   const [progress] = useState<Record<string, number>>(DEFAULT_PROGRESS);
   const [showSearch, setShowSearch] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -122,42 +124,77 @@ export default function Home() {
     <div className="min-h-screen">
 
       {/* ── Navbar ── */}
-      <nav style={{ backgroundColor: '#3D3228' }} className="sticky top-0 z-50 shadow-md">
+      <nav style={{ backgroundColor: '#1c1c1c' }} className="sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4">
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden text-white hover:opacity-80 transition-opacity"
+              onClick={() => setShowMobileMenu(prev => !prev)}
+              aria-label="Toggle menu"
+            >
+              {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
+            </button>
             <div className="flex items-center gap-2">
-              <BookOpen style={{ color: '#F4B942' }} size={24} />
-              <span className="text-white font-bold text-xl tracking-wide">PageTurner</span>
+              <BookOpen style={{ color: '#fd601a' }} size={24} />
+              <span className="text-white font-bold text-xl tracking-wide" style={{ fontFamily: 'var(--font-bodoni), serif' }}>PageTurner</span>
             </div>
-            <div className="hidden md:flex items-center gap-6">
-              {['My Books', 'Browse', 'Community', 'Lists'].map((link) => (
-                <a key={link} href="#" style={{ color: '#D4C9B5' }} className="hover:text-white transition-colors text-sm">
-                  {link}
-                </a>
+            <div className="hidden md:flex items-center gap-6 ml-4">
+              {[
+                { label: 'My Books', href: '/' },
+                { label: 'Browse', href: '#' },
+                { label: 'Community', href: '#' },
+                { label: 'My Stats', href: '/stats' },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href} style={{ color: label === 'My Books' ? '#fd601a' : '#ffffff' }} className="hover:opacity-80 transition-opacity text-sm font-bold">
+                  {label}
+                </Link>
               ))}
             </div>
           </div>
           <div className="flex items-center gap-4">
             <button
-              style={{ color: '#D4C9B5' }}
+              style={{ color: '#cccccc' }}
               className="hover:text-white transition-colors"
               onClick={() => setShowSearch(true)}
             >
               <Search size={20} />
             </button>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F4B942' }}>
-              <User size={16} style={{ color: '#3D3228' }} />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#EEE8DD' }}>
+              <User size={16} style={{ color: '#1c1c1c' }} />
             </div>
           </div>
         </div>
+
+        {/* Mobile full-screen menu */}
+        {showMobileMenu && (
+          <div className="md:hidden fixed inset-0 z-40 flex flex-col px-8 pt-24 pb-12" style={{ backgroundColor: '#1c1c1c' }}>
+            {[
+              { label: 'My Books', href: '/' },
+              { label: 'Browse', href: '#' },
+              { label: 'Community', href: '#' },
+              { label: 'My Stats', href: '/stats' },
+            ].map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                className="block text-3xl font-bold py-5 border-b hover:opacity-70 transition-opacity"
+                style={{ color: label === 'My Books' ? '#fd601a' : '#ffffff', borderColor: '#333333' }}
+                onClick={() => setShowMobileMenu(false)}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
         {/* ── Stats Bar ── */}
         <div
-          className="bg-white rounded-xl shadow-sm border p-5 mb-8 flex flex-wrap gap-6 items-center"
-          style={{ borderColor: '#D4C9B5' }}
+          className="bg-white rounded-xl border p-5 mb-8 flex flex-wrap gap-6 items-center"
+          style={{ borderColor: '#1c1c1c' }}
         >
           {[
             { value: completed.length, label: 'Books Read' },
@@ -165,25 +202,25 @@ export default function Home() {
             { value: wantToRead.length, label: 'Want to Read' },
           ].map((stat, i) => (
             <div key={stat.label} className="flex items-center gap-6">
-              {i > 0 && <div className="hidden md:block w-px h-10" style={{ backgroundColor: '#D4C9B5' }} />}
+              {i > 0 && <div className="hidden md:block w-px h-10" style={{ backgroundColor: '#cccccc' }} />}
               <div className="text-center">
-                <div className="text-3xl font-bold" style={{ color: '#3D3228' }}>{stat.value}</div>
-                <div className="text-xs mt-1" style={{ color: '#6B5A44' }}>{stat.label}</div>
+                <div className="text-3xl font-bold" style={{ color: '#1c1c1c' }}>{stat.value}</div>
+                <div className="text-xs mt-1" style={{ color: '#555555' }}>{stat.label}</div>
               </div>
             </div>
           ))}
           <div className="flex-1 hidden md:block min-w-40">
             <div className="flex justify-between mb-1">
-              <span className="text-xs" style={{ color: '#6B5A44' }}>Reading Goal</span>
-              <span className="text-xs font-semibold" style={{ color: '#3D3228' }}>{completed.length} / 12 books</span>
+              <span className="text-xs" style={{ color: '#555555' }}>Reading Goal</span>
+              <span className="text-xs font-semibold" style={{ color: '#1c1c1c' }}>{completed.length} / 12 books</span>
             </div>
             <div className="w-full rounded-full h-2" style={{ backgroundColor: '#EEE8DD' }}>
-              <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#F4B942' }} />
+              <div className="h-2 rounded-full" style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#fd601a' }} />
             </div>
           </div>
           <button
             className="ml-auto px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: '#F4B942', color: '#3D3228' }}
+            style={{ backgroundColor: '#1c1c1c', color: '#ffffff' }}
             onClick={() => setShowSearch(true)}
           >
             + Add Book
@@ -199,28 +236,28 @@ export default function Home() {
             {/* Currently Reading */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold" style={{ color: '#3D3228' }}>Currently Reading</h2>
-                <a href="#" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#8B6914' }}>
+                <h2 className="text-xl font-bold" style={{ color: '#1c1c1c' }}>Currently Reading</h2>
+                <Link href="/reading" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#1c1c1c' }}>
                   See all <ChevronRight size={14} />
-                </a>
+                </Link>
               </div>
               <div className="space-y-4">
                 {currentlyReading.map((book) => (
                   <div
                     key={book.id}
-                    className="bg-white rounded-xl shadow-sm border p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ borderColor: '#D4C9B5' }}
+                    className="bg-white rounded-xl border p-4 flex gap-4 cursor-pointer"
+                    style={{ borderColor: '#1c1c1c' }}
                   >
                     <BookCover id={book.id} coverUrl={book.coverUrl} size="md" />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base" style={{ color: '#2C2416' }}>{book.title}</h3>
-                      <p className="text-sm mb-2" style={{ color: '#6B5A44' }}>{book.author}</p>
+                      <h3 className="font-bold text-base" style={{ color: '#1c1c1c' }}>{book.title}</h3>
+                      <p className="text-sm mb-2" style={{ color: '#555555' }}>{book.author}</p>
                       <div className="flex flex-wrap gap-1 mb-3">
                         {book.genres.map((genre) => (
                           <span
                             key={genre}
                             className="px-2 py-0.5 text-xs rounded-full"
-                            style={{ backgroundColor: '#EEE8DD', color: '#6B5A44' }}
+                            style={{ backgroundColor: '#EEE8DD', color: '#555555' }}
                           >
                             {genre}
                           </span>
@@ -228,7 +265,7 @@ export default function Home() {
                       </div>
                       {progress[book.id] !== undefined && (
                         <div>
-                          <div className="flex justify-between text-xs mb-1" style={{ color: '#6B5A44' }}>
+                          <div className="flex justify-between text-xs mb-1" style={{ color: '#555555' }}>
                             <span>Reading progress</span>
                             <span className="font-semibold">{progress[book.id]}%</span>
                           </div>
@@ -244,7 +281,7 @@ export default function Home() {
                   </div>
                 ))}
                 {currentlyReading.length === 0 && (
-                  <p className="text-sm" style={{ color: '#6B5A44' }}>No books in progress. Search for one to start reading!</p>
+                  <p className="text-sm" style={{ color: '#555555' }}>No books in progress. Search for one to start reading!</p>
                 )}
               </div>
             </section>
@@ -252,17 +289,17 @@ export default function Home() {
             {/* Want to Read */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold" style={{ color: '#3D3228' }}>Want to Read</h2>
-                <a href="#" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#8B6914' }}>
+                <h2 className="text-xl font-bold" style={{ color: '#1c1c1c' }}>Want to Read</h2>
+                <Link href="/want-to-read" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#1c1c1c' }}>
                   See all <ChevronRight size={14} />
-                </a>
+                </Link>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {wantToRead.map((book) => (
                   <div
                     key={book.id}
-                    className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ borderColor: '#D4C9B5' }}
+                    className="bg-white rounded-xl border overflow-hidden cursor-pointer"
+                    style={{ borderColor: '#1c1c1c' }}
                   >
                     {book.coverUrl ? (
                       <img
@@ -280,8 +317,8 @@ export default function Home() {
                       </div>
                     )}
                     <div className="p-2.5">
-                      <h4 className="font-semibold text-xs leading-tight" style={{ color: '#2C2416' }}>{book.title}</h4>
-                      <p className="text-xs mt-0.5" style={{ color: '#6B5A44' }}>{book.author}</p>
+                      <h4 className="font-semibold text-xs leading-tight" style={{ color: '#1c1c1c' }}>{book.title}</h4>
+                      <p className="text-xs mt-0.5" style={{ color: '#555555' }}>{book.author}</p>
                     </div>
                   </div>
                 ))}
@@ -291,22 +328,22 @@ export default function Home() {
             {/* Read / Completed */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold" style={{ color: '#3D3228' }}>Read</h2>
-                <a href="#" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#8B6914' }}>
+                <h2 className="text-xl font-bold" style={{ color: '#1c1c1c' }}>Read</h2>
+                <Link href="/completed" className="text-sm flex items-center gap-1 hover:underline" style={{ color: '#1c1c1c' }}>
                   See all <ChevronRight size={14} />
-                </a>
+                </Link>
               </div>
               <div className="space-y-3">
                 {completed.map((book) => (
                   <div
                     key={book.id}
-                    className="bg-white rounded-xl shadow-sm border p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ borderColor: '#D4C9B5' }}
+                    className="bg-white rounded-xl border p-4 flex gap-4 cursor-pointer"
+                    style={{ borderColor: '#1c1c1c' }}
                   >
                     <BookCover id={book.id} coverUrl={book.coverUrl} size="sm" />
                     <div className="flex-1">
-                      <h3 className="font-bold text-sm" style={{ color: '#2C2416' }}>{book.title}</h3>
-                      <p className="text-xs mb-1.5" style={{ color: '#6B5A44' }}>{book.author}</p>
+                      <h3 className="font-bold text-sm" style={{ color: '#1c1c1c' }}>{book.title}</h3>
+                      <p className="text-xs mb-1.5" style={{ color: '#555555' }}>{book.author}</p>
                       {book.rating !== undefined && <StarRating rating={book.rating} />}
                     </div>
                     <div className="flex items-start">
@@ -325,14 +362,14 @@ export default function Home() {
           <div className="space-y-6">
 
             {/* Genre Browser */}
-            <div className="bg-white rounded-xl shadow-sm border p-5" style={{ borderColor: '#D4C9B5' }}>
-              <h3 className="font-bold text-base mb-4" style={{ color: '#3D3228' }}>Browse by Genre</h3>
+            <div className="bg-white rounded-xl border p-5" style={{ borderColor: '#1c1c1c' }}>
+              <h3 className="font-bold text-base mb-4" style={{ color: '#1c1c1c' }}>Browse by Genre</h3>
               <div className="flex flex-wrap gap-2">
                 {genres.map((genre) => (
                   <button
                     key={genre}
                     className="px-3 py-1.5 text-sm rounded-full transition-colors cursor-pointer hover:opacity-80"
-                    style={{ backgroundColor: '#EEE8DD', color: '#3D3228' }}
+                    style={{ backgroundColor: '#EEE8DD', color: '#1c1c1c', border: '1px solid #1c1c1c' }}
                   >
                     {genre}
                   </button>
@@ -341,8 +378,8 @@ export default function Home() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-xl shadow-sm border p-5" style={{ borderColor: '#D4C9B5' }}>
-              <h3 className="font-bold text-base mb-4" style={{ color: '#3D3228' }}>Recent Activity</h3>
+            <div className="bg-white rounded-xl border p-5" style={{ borderColor: '#1c1c1c' }}>
+              <h3 className="font-bold text-base mb-4" style={{ color: '#1c1c1c' }}>Recent Activity</h3>
               <div className="space-y-3">
                 {recentActivity.map((item, i) => (
                   <div key={i} className="flex gap-3 items-start">
@@ -351,12 +388,12 @@ export default function Home() {
                       style={{ backgroundColor: item.color }}
                     />
                     <div>
-                      <p className="text-xs" style={{ color: '#2C2416' }}>
+                      <p className="text-xs" style={{ color: '#1c1c1c' }}>
                         {item.text}{' '}
                         <span className="font-semibold">{item.book}</span>
                         {item.suffix ? ` ${item.suffix}` : ''}
                       </p>
-                      <p className="text-xs" style={{ color: '#6B5A44' }}>{item.when}</p>
+                      <p className="text-xs" style={{ color: '#555555' }}>{item.when}</p>
                     </div>
                   </div>
                 ))}
@@ -364,16 +401,16 @@ export default function Home() {
             </div>
 
             {/* Reading Challenge */}
-            <div className="bg-white rounded-xl shadow-sm border p-5" style={{ borderColor: '#D4C9B5' }}>
-              <h3 className="font-bold text-base mb-1" style={{ color: '#3D3228' }}>Reading Challenge</h3>
-              <p className="text-xs mb-3" style={{ color: '#6B5A44' }}>{completed.length} of 12 books complete</p>
+            <div className="bg-white rounded-xl border p-5" style={{ borderColor: '#1c1c1c' }}>
+              <h3 className="font-bold text-base mb-1" style={{ color: '#1c1c1c' }}>Reading Challenge</h3>
+              <p className="text-xs mb-3" style={{ color: '#555555' }}>{completed.length} of 12 books complete</p>
               <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: '#EEE8DD' }}>
                 <div
                   className="h-3 rounded-full"
-                  style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#F4B942' }}
+                  style={{ width: `${Math.min(100, (completed.length / 12) * 100)}%`, backgroundColor: '#fd601a' }}
                 />
               </div>
-              <p className="text-xs" style={{ color: '#6B5A44' }}>
+              <p className="text-xs" style={{ color: '#555555' }}>
                 {Math.round((completed.length / 12) * 100)}% of goal
               </p>
             </div>

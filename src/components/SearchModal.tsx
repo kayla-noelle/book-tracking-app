@@ -42,11 +42,11 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
       style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col" style={{ borderColor: '#D4C9B5' }}>
+      <div className="bg-white rounded-2xl border w-full max-w-2xl max-h-[80vh] flex flex-col" style={{ borderColor: '#1c1c1c' }}>
 
         {/* Header / Search bar */}
-        <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: '#D4C9B5' }}>
-          <Search size={18} style={{ color: '#8B6914' }} />
+        <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: '#1c1c1c' }}>
+          <Search size={18} style={{ color: '#fd601a' }} />
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
             <input
               ref={inputRef}
@@ -54,17 +54,17 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by title or author..."
               className="flex-1 outline-none text-sm"
-              style={{ color: '#2C2416' }}
+              style={{ color: '#1c1c1c' }}
             />
             <button
               type="submit"
               className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#F4B942', color: '#3D3228' }}
+              style={{ backgroundColor: '#fd601a', color: '#1c1c1c' }}
             >
               Search
             </button>
           </form>
-          <button onClick={onClose} style={{ color: '#6B5A44' }} className="hover:text-gray-900 transition-colors">
+          <button onClick={onClose} style={{ color: '#555555' }} className="hover:text-gray-900 transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -73,16 +73,16 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
         <div className="overflow-y-auto flex-1 p-4 space-y-3">
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <Loader2 size={24} className="animate-spin" style={{ color: '#8B6914' }} />
+              <Loader2 size={24} className="animate-spin" style={{ color: '#fd601a' }} />
             </div>
           )}
           {!loading && results.length === 0 && !query && (
-            <p className="text-center py-8 text-sm" style={{ color: '#6B5A44' }}>
+            <p className="text-center py-8 text-sm" style={{ color: '#555555' }}>
               Search for a book to add to your library.
             </p>
           )}
           {!loading && results.length === 0 && query && (
-            <p className="text-center py-8 text-sm" style={{ color: '#6B5A44' }}>No results found.</p>
+            <p className="text-center py-8 text-sm" style={{ color: '#555555' }}>No results found.</p>
           )}
           {results.map((vol) => {
             const info = vol.volumeInfo;
@@ -93,8 +93,8 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
             return (
               <div
                 key={vol.id}
-                className="flex gap-3 p-3 rounded-xl border transition-colors"
-                style={{ borderColor: '#D4C9B5' }}
+                className="flex gap-3 p-3 rounded-xl border"
+                style={{ borderColor: '#1c1c1c' }}
               >
                 {thumb ? (
                   <img
@@ -106,20 +106,20 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
                 ) : (
                   <div
                     className="rounded flex-shrink-0 flex items-center justify-center"
-                    style={{ width: 48, height: 72, backgroundColor: '#8B6914' }}
+                    style={{ width: 48, height: 72, backgroundColor: '#fd601a' }}
                   >
                     <BookOpen size={16} className="text-white opacity-40" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm leading-tight" style={{ color: '#2C2416' }}>
+                  <p className="font-semibold text-sm leading-tight" style={{ color: '#1c1c1c' }}>
                     {info.title}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: '#6B5A44' }}>
+                  <p className="text-xs mt-0.5" style={{ color: '#555555' }}>
                     {info.authors?.join(', ') ?? 'Unknown Author'}
                   </p>
                   {info.categories && (
-                    <p className="text-xs mt-0.5" style={{ color: '#8B6914' }}>
+                    <p className="text-xs mt-0.5" style={{ color: '#fd601a' }}>
                       {info.categories[0]}
                     </p>
                   )}
@@ -134,7 +134,7 @@ export default function SearchModal({ onClose, onAdd, existingIds }: Props) {
                       <button
                         onClick={() => handleAdd(vol, 'want-to-read')}
                         className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
-                        style={{ backgroundColor: '#EEE8DD', color: '#3D3228' }}
+                        style={{ backgroundColor: '#EEE8DD', color: '#1c1c1c' }}
                       >
                         <Plus size={10} /> Want to Read
                       </button>

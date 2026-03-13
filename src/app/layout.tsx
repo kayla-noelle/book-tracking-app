@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Lora } from "next/font/google";
+import { Noto_Sans, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 
-const lora = Lora({
-  variable: "--font-lora",
+const notoSans = Noto_Sans({
+  variable: "--font-noto-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const bodoniModa = Bodoni_Moda({
+  variable: "--font-bodoni",
   subsets: ["latin"],
   display: "swap",
 });
@@ -20,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lora.variable} antialiased`}>
+      <body className={`${notoSans.variable} ${bodoniModa.variable} antialiased`}>
         {children}
       </body>
     </html>

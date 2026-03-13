@@ -2,17 +2,17 @@
 
 :root {
   --background: #EEE8DD;
-  --foreground: #2C2416;
+  --foreground: #1c1c1c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-lora);
+  --font-sans: var(--font-noto-sans);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-noto-sans), sans-serif;
 }
